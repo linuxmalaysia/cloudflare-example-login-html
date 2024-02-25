@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Intranet Portal Login API</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.1/css/bootstrap.min.css" integrity="sha512-siwe/oXMhSjGCwLn+scraPOWrJxHlUgMBMZXdPe2Tnk3I0x3ESCoLz7WZ5NTH6SZrywMY+PB1cjyqJ5jAluCOg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.9.1/font/bootstrap-icons.min.css" integrity="sha512-5PV92qsds/16vyYIJo3T/As4m2d8b6oWYfoqV+vtizRB6KhF1F9kYzWzQmsO6T3z3QG2Xdhrx7FQ+5R1LiQdUA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad"></script> 
+
+<style>
+html,
+body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  padding-top: 40px;
+  padding-bottom: 40px;
+  background-color: #fefefe;
+}
+
+.form-signin {
+  width: 100%;
+  max-width: 330px;
+  padding: 15px;
+  margin: auto;
+}
+
+.form-signin .checkbox {
+  font-weight: 400;
+}
+
+.form-signin .form-floating:focus-within {
+  z-index: 2;
+}
+
+.form-signin input[type="text"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.form-signin input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+</style>
+
+</head>
+
+<body>
+
+<main class="form-signin">
+  <form method="POST" action="/">
+    <h2 class="h3 mb-3 fw-normal">Intranet &dash; Portal Login</h2>
+
+    <div class="form-floating">
+      <input type="text" id="user" class="form-control">
+      <label for="user">User name</label>
+    </div>
+    <div class="form-floating">
+      <input type="password" id="pass" class="form-control" autocomplete="off" readonly value="CorrectHorseBatteryStaple">
+      <label for="pass">Password</label>
+    </div>
+
+    <div class="checkbox mb-3">
+      <!-- The following line controls and configures the Turnstile widget. -->
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAAASoVhaF3M4YtPVl" data-theme="light"></div>
+      <!-- end. -->
+    </div>
+    <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
+    <p class="mt-5 mb-3 text-muted"><a href="https://github.com/cloudflare/turnstile-demo-workers"><i class="bi bi-github"></i> See code</a></p>
+    <p class="mt-5 mb-3 text-muted">Go to the <a href="/explicit">explicit render demo</a></p>
+  </form>
+</main>
+
+<script>
+    const TURNSTILE_SECRET_KEY = "1x0000000000000000000000000000000AA"; // Replace with your actual secret key
+
+    const onTurnstileLoad = () => {
+      const form = document.getElementById("login-form");
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault(); // Prevent default form submission
+
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const token = turnstile.getChallengeToken(); // Get Turnstile challenge token
+
+        try {
+          const tokenValidationResponse = await validateToken(token, TURNSTILE_SECRET_KEY);
+          if (!tokenValidationResponse.success) {
+            throw new Error("Token validation failed: " + tokenValidationResponse.error);
+          }
+
+          const loginResponse = await forwardMessage(username, password); // Send login request
+          if (!loginResponse.ok) {
+            throw new Error("Login request failed: " + loginResponse.statusText);
+          }
+
+          console.log("Login successful!");
+          // Handle successful login (e.g., redirect to homepage)
+        } catch (error) {
+          console.error("Error:", error);
+          // Handle errors (e.g., display error message to user)
+        }
+      });
+    };
+
+    async function validateToken(token, secretKey) {
+      const formData = new FormData();
+      formData.append("secret", secretKey);
+      formData.append("response", token);
+      formData.append("remoteip", request.headers.get("CF-Connecting-IP")); // Access IP from request header
+
+      const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+        method: "POST",
+        body: formData,
+      });
+
+      return await response.json();
+    }
+
+    async function forwardMessage(username, password) {
+      // Implement your logic to send login data to the appropriate endpoint
+      // (e.g., email address, webhook, API call)
+      // Replace this placeholder with your actual implementation
+
+      const response = await fetch(/* your endpoint URL */, {
+        method: "POST", // Adjust method if needed (e.g., GET)
+        headers: {
+          "Content-Type": "application/json" // Adjust header if necessary
+        },
+        body: JSON.stringify({ username, password }) // Adjust body format if needed
+      });
+
+      return response;
+    }
+  </script>
+
+</body>
+</html>
