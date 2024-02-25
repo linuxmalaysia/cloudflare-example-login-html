@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 <title>Intranet Portal Login API</title>
 <head>
@@ -7,7 +8,19 @@
 </head>
 
 <body>
+
 <script>
+
+function isset(object, identifier) {
+    //Works for objects and arrays
+    if (typeof object !== 'object') {
+       throw new TypeError('The first argument is expected to be of type object')
+    }
+
+    return identifier in object && object[identifier] != null
+}
+
+
 export async function onRequestPost(context) {
   try {
     return await handleRequest(context);
